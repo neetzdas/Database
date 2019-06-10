@@ -1,0 +1,27 @@
+/*
+Group Number: 25
+File Name: packages_test25.txt
+Group Members:  Shreejan Regmi - 18417132
+				Neetu Kumari Das- 18406487
+				Saurav Khatiwada - 18413649
+				Hira Bahadur Rana Kauchha - 18413703
+Module Name: Database 2
+Module Code: CSY2038			
+*/
+
+--@E:\CSY2038Ass2\packages_test25.txt;
+
+--Showing output to the screen
+SET SERVEROUTPUT ON;
+
+--checking the creation of package pkg_leader_details
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_NAME = 'PKG_LEADER_DETAILS';
+--2 ROWS RETURNED
+
+--creating unnamed block to execute package pkg_leader_details with staff id as argument
+BEGIN
+	pkg_leader_details.proc_output_leader_name(2);
+END;
+/
+--The leader name of staff 2 is AAYUSH MOKTAN
+--OK

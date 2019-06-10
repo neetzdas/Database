@@ -1,0 +1,411 @@
+/*
+Group Number: 25
+File Name: triggers_test25.txt
+Group Members:  Shreejan Regmi - 18417132
+				Neetu Kumari Das- 18406487
+				Saurav Khatiwada - 18413649
+				Hira Bahadur Rana Kauchha - 18413703
+Module Name: Database 2
+Module Code: CSY2038			
+*/
+
+--@E:\CSY2038Ass2\triggers_test25.txt;
+
+--to display output on the screen
+SET SERVEROUTPUT ON
+
+--TRIGGER 1
+--Checking the creation of trigger trig_staff_dob_ck
+SELECT trigger_name FROM user_triggers WHERE trigger_name= 'TRIG_STAFF_DOB_CK';
+--1 row returned --found
+
+--viewing the structure of staff table before inserting data
+DESC staff;
+
+--testing the trigger trig_staff_dob_ck by inserting keeping age less than 18
+INSERT INTO staff
+SELECT seq_staff_id.NEXTVAL, 'GEORGE', 'MICHAEL', 1, 4444.56, 'M', '2-JUN-2009' , NULL ,contact_varray_type(contact_type('+9779866544377', 'GEORGE@GMAIL.COM'),
+																									 contact_type('+9771234567998', 'GEORGE@YAHOO.COM')), REF(a)
+FROM addresses a
+WHERE a.street='562 HOCKEY STREET';
+--Error Thrown: STAFF SHOULD BE AN ADULT
+--OK
+
+--checking if the row is inserted
+SELECT staff_id, staff_fname, staff_lname FROM staff WHERE staff_fname LIKE '%G%';
+--0 row returned
+--not inserted
+
+--testing the trigger trig_staff_dob_ck by inserting keeping age more than 18
+INSERT INTO staff
+SELECT seq_staff_id.NEXTVAL, 'GEORGE', 'MICHAEL', 1, 4444.56, 'M', '2-SEP-1998' ,NULL,contact_varray_type(contact_type('+9779866544377', 'GEORGE@GMAIL.COM'),
+																									 contact_type('+9771234567998', 'GEORGE@YAHOO.COM')), REF(a)
+FROM addresses a
+WHERE a.street='562 HOCKEY STREET';
+--OK
+
+--checking if the row is inserted
+SELECT staff_id, staff_fname, staff_lname FROM staff WHERE staff_fname LIKE '%GEO%';
+--1 rows returned
+--inserted 
+--OK
+
+--testing the trigger trig_staff_dob_ck by inserting keeping age equal to 18
+INSERT INTO staff
+SELECT seq_staff_id.NEXTVAL, 'SHAWN', 'MICHAEL', 1, 4444.56, 'M', '8-APR-2001' , NULL ,contact_varray_type(contact_type('+9779866544377', 'GEORGE@GMAIL.COM'),
+																									 contact_type('+9771234567998', 'GEORGE@YAHOO.COM')), REF(a)
+FROM addresses a
+WHERE a.street='562 HOCKEY STREET';
+--OK
+
+--checking if the row is inserted
+SELECT staff_id, staff_fname, staff_lname FROM staff WHERE staff_fname LIKE 'SHAWN';
+--1 row returned
+--inserted
+--OK
+
+--testing the trigger trig_staff_dob_ck by inserting keeping staff_dob NULL
+INSERT INTO staff
+SELECT seq_staff_id.NEXTVAL, 'PAUL', 'MCCARTNEY', 1, 4444.56, 'M', NULL , NULL ,contact_varray_type(contact_type('+9779866544377', 'PAUL@GMAIL.COM'),
+																									 contact_type('+9771234567998', 'PAUL@YAHOO.COM')), REF(a)
+FROM addresses a
+WHERE a.street='562 HOCKEY STREET';
+--1 row inserted
+--trigger not fired
+
+--checking if the row is inserted
+SELECT staff_id, staff_fname, staff_lname FROM staff WHERE staff_fname = 'PAUL';
+--1 row returned
+--inserted
+--OK
+
+--updating
+--testing the trigger trig_staff_dob_ck by updating keeping age NULL
+UPDATE staff SET staff_dob = NULL
+WHERE staff_id = 9;
+--1 row updated
+--trigger not fired
+
+--checking if the row is updated
+SELECT staff_id, staff_fname, staff_lname, staff_dob FROM staff WHERE staff_fname = 'PAUL';
+--1 row returned
+--updated
+--OK
+
+--testing the trigger trig_staff_dob_ck by updating keeping age less than 18
+UPDATE staff SET staff_dob = '14-MAR-2010'
+WHERE staff_id = 5;
+--Output: STAFF SHOULD BE AN ADULT
+--OK: Error is thrown
+
+--checking update of column staff_dob for staff id 5
+SELECT staff_id, staff_fname, staff_lname, staff_dob FROM staff WHERE staff_id=5;
+--not updated
+--OK
+
+--testing the trigger trig_staff_dob_ck by updating keeping age equal to 18
+UPDATE staff SET staff_dob = '8-April-2001'
+WHERE staff_id = 5;
+--OK: Error is not thrown
+
+--checking update of column staff_dob for staff id 5
+SELECT staff_id, staff_fname, staff_lname, staff_dob FROM staff WHERE staff_id=5;
+--updated 
+--OK
+
+--testing the trigger trig_staff_dob_ck by updating keeping age more than 18
+UPDATE staff 
+SET staff_dob = '8-April-1990'
+WHERE staff_id = 5;
+--OK: Error is not thrown
+
+--checking update of column staff_dob for staff id 5
+SELECT staff_id, staff_fname, staff_lname, staff_dob FROM staff WHERE staff_id=5;
+--updated 
+--OK
+
+--TRIGGER 2
+--Checking the creation of trigger trig_locations_message
+SELECT trigger_name FROM user_triggers WHERE trigger_name= 'TRIG_LOCATIONS_MESSAGE';
+--1 row returned --found
+
+--testing the trigger trig_locations_message by inserting a row in locations table
+INSERT INTO locations
+VALUES (seq_location_id.NEXTVAL,address_type('TAMGHAS 6', 'GULMI', 'NEPAL'));
+--Trigger fired
+--OUTPUT: INSERTION SUCCESSFUL
+--		  1 row created
+--OK
+
+--checking if the row is inserted
+SELECT l.location_id, l.location_name FROM locations l WHERE l.location_name.street='TAMGHAS 6';
+--1 row returned
+--inserted
+
+--testing the trigger trig_locations_message by updating an existing column in locations table
+UPDATE locations l
+SET l.location_name.street='TAMGHAS 9'
+WHERE l.location_id=10; 
+--Trigger fired
+--OUTPUT: UPDATE SUCCESSFUL
+-- 1 row updated.
+
+--checking if the row is updated
+SELECT l.location_id, l.location_name FROM locations l WHERE l.location_name.street='TAMGHAS 9';
+--1 row returned
+--updated
+
+
+--TRIGGER 3
+--checking the creation of trigger trig_combined
+SELECT trigger_name FROM user_triggers WHERE trigger_name= 'TRIG_COMBINED';
+
+--testing trigger trig_combined for delete
+--checking the row in staff table where staff id = 9 before deleting
+SELECT s.staff_id, s.staff_fname, s.staff_lname FROM staff s WHERE s.staff_id = 9;
+--1 row returned
+
+--testing the trigger trig_combined by deleting a row from staff table
+DELETE FROM staff
+WHERE staff_id=9;
+--Trigger fired
+--OUTPUT: You are deleting PAUL MCCARTNEY
+
+--checking the row in staff table where staff id = 9 after deleting
+SELECT s.staff_id, s.staff_fname, s.staff_lname FROM staff s WHERE s.staff_id = 9;
+--no rows selected
+--row deleted 
+--OK
+
+--checking the creation of function func_calculate_staff_age 
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_NAME ='FUNC_CALCULATE_STAFF_AGE';
+--1 row returned
+
+--checking the creation of procedure proc_test_calc_age 
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_NAME ='PROC_TEST_CALC_AGE';
+--1 row returned
+
+--testing function func_calculate_staff_age using procedure proc_test_calc_age 
+EXECUTE proc_test_calc_age('05-MAR-1995', 'BETTY');
+--OK
+
+
+--testing trigger trig_combined for insert
+--checking the number of rows on staff before executing trigger
+SELECT staff_id, staff_fname, staff_lname FROM staff;
+
+--inserting new row into staff to test with non null date of birth
+INSERT INTO staff
+SELECT seq_staff_id.NEXTVAL, 'JOHN', 'LENNON', 1, 4222.56, 'M', '12-JAN-1992' , NULL ,contact_varray_type(contact_type('+9779854422342', 'JOHN@GMAIL.COM'),
+																									 contact_type('+9779877655432', 'JOHN@YAHOO.COM')), REF(a)
+FROM addresses a
+WHERE a.street='562 HOCKEY STREET';
+--trigger fired
+--OUTPUT: You have added JOHN and their age is 27
+--value correct
+
+--checking the number of rows after executing trigger
+SELECT staff_id, staff_fname, staff_lname FROM staff WHERE staff_fname = 'JOHN';
+--1 row returned
+--new row added 
+--OK
+
+--inserting new row into staff to test with null date of birth
+INSERT INTO staff
+SELECT seq_staff_id.NEXTVAL, 'JOHN', 'BONHAM', 1, 4222.56, 'M', NULL , NULL ,contact_varray_type(contact_type('+9779854422343', 'JOHN@GMAIL.COM'),
+																									 contact_type('+9779877655437', 'JOHN@YAHOO.COM')), REF(a)
+FROM addresses a
+WHERE a.street='562 HOCKEY STREET';
+--trigger should not be fired
+--trigger not fired
+
+--checking the number of rows after executing trigger
+SELECT staff_id, staff_fname, staff_lname FROM staff WHERE staff_fname = 'JOHN';
+--2 rows returned 
+--OK
+
+
+--testing trigger trig_combined for update
+--checking the creation of function func_calc_retiring
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_NAME ='FUNC_CALC_RETIRING';
+--1 row returned
+	
+--checking the creation of procedure proc_calc_retiring
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_NAME ='PROC_CALC_RETIRING';
+--1 row returned
+
+--testing function func_calc_retiring using procedure proc_calc_retiring
+EXECUTE proc_calc_retiring('03-FEB-1977');		
+--OUTPUT: Days before retirement: 8395
+--		  Years before retirement: 23
+--OK
+
+--checking the details of staff to be updated before updating the details
+SELECT staff_id, staff_fname, staff_lname FROM staff WHERE staff_id=5;
+
+--updating the date of birth of staff with null DOB on staff id 5
+--trigger should not be fired
+UPDATE staff 
+SET staff_dob=NULL
+WHERE staff_id=5;
+--Trigger not fired
+--OK
+
+--checking the details of staff 5 after updating the details
+SELECT staff_id, staff_fname, staff_lname, staff_dob FROM staff WHERE staff_id=5;
+--staff_dob: NULL
+
+--updating the date of birth of staff with valid DOB on staff id 5
+UPDATE staff 
+SET staff_dob='21-JAN-1989'
+WHERE staff_id=5;
+--Trigger should be fired
+--Trigger fired
+--Output: Days before retirement: 12775
+-- 		  Years before retirement: 35
+--Value correct
+
+--checking the details of staff 5 after updating the details
+SELECT staff_id, staff_fname, staff_lname, staff_dob FROM staff WHERE staff_id=5;
+--staff_dob updated
+--Value: 21-JAN-89
+
+--TRIGGER 4
+--checking the creation of trigger trig_schema_level
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_NAME ='TRIG_SCHEMA_LEVEL';
+--1 row returned
+--created
+
+--Testing trigger trig_schema_level by creating a mock table
+--trigger should be fired for create event 
+CREATE TABLE mock(
+	test NUMBER(3)
+);
+--OUTPUT:
+--Event- CREATE performed on schema CSY2038ASS2 for MOCK TABLE
+--Trigger fired
+
+--checking the creation of table mock
+SELECT TNAME FROM TAB WHERE tname = 'MOCK';
+--1 row selected
+--table created
+
+--Testing trigger trig_schema_level by altering the table mock setting primary key
+--trigger should be fired for create event of pk_mock and alter event of table mock
+ALTER TABLE mock
+ADD CONSTRAINT pk_mock
+PRIMARY KEY (test);
+--OUTPUT:
+--Event- CREATE performed on schema CSY2038ASS2 for PK_MOCK INDEX
+--Event- ALTER performed on schema CSY2038ASS2 for MOCK TABLE
+--trigger fired
+
+--checking the creation of constraint pk_mock
+SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_NAME = 'PK_MOCK';
+--1 row returned
+--constraint created
+
+--Testing trigger trig_schema_level by dropping constraint pk_mock and table mock
+--dropping constraint pk_mock
+ALTER TABLE mock
+DROP CONSTRAINT pk_mock;
+--trigger fired
+--OUTPUT:
+--Event- DROP performed on schema CSY2038ASS2 for PK_MOCK INDEX
+--Event- ALTER performed on schema CSY2038ASS2 for MOCK TABLE
+
+--checking the drop of constraint pk_mock
+SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_NAME = 'PK_MOCK';
+--0 row returned
+--constraint dropped
+
+--dropping table mock
+DROP TABLE mock;
+--trigger fired
+--OUTPUT:
+--Event- DROP performed on schema CSY2038ASS2 for MOCK TABLE
+PURGE RECYCLEBIN;
+
+--checking the drop of table mock
+SELECT TNAME FROM TAB WHERE tname = 'MOCK';
+--0 row selected
+--table dropped
+
+
+--TRIGGER 5
+--checking the creation of table history
+SELECT TNAME FROM TAB WHERE TNAME='HISTORY';
+--1 row returned
+
+--checking the creation of procedure proc_insert_history
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_NAME ='PROC_INSERT_HISTORY';
+--1 row returned
+
+--checking if there are any rows inserted in history table
+SELECT * FROM history;
+--0 rows returned
+
+--testing procedure proc_insert_history by passing an argument in the procedure 
+EXECUTE proc_insert_history('TEST' ,'TEST');
+
+----checking if there are any rows inserted in history table
+SELECT * FROM history;
+--1 row returned
+--inserted
+--procedure working
+
+--deleting test data from history table 
+DELETE FROM history;
+--1 row deleted
+
+--testing the trigger trig_database_login and trig_database_logoff by disconnecting and logging in in CSY2038Ass2 schema
+--TEST: (WORKING)
+--SQL> disconnect
+--Disconnected from Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
+--SQL> connect
+--Enter user-name: CSY2038Ass2
+--Enter password:
+--Connected.
+--SQL> select * from history;
+
+--LOGIN_USER           EVENT
+-------------------- --------------------------------------------------
+--DATE_TIME
+---------------------------------------------------------------------------
+--CSY2038ASS2          LOGOFF
+--12-APR-19 09.15.05.911000 PM
+
+--CSY2038ASS2          LOGON
+--12-APR-19 09.15.12.182000 PM
+
+
+
+--testing the trigger trig_database_login and trig_database_logoff by disconnecting and logging in in other (CSY2027e) schema
+--first deleting all rows from history table;
+DELETE FROM history;
+--2 rows deleted
+
+--SQL> disconnect
+--Disconnected from Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
+--SQL> connect
+--Enter user-name: CSY2027e
+--Enter password:
+--Connected.
+--SQL> disconnect;
+--Disconnected from Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
+--SQL> connect
+--Enter user-name: CSY2038Ass2
+--Enter password:
+--Connected.
+--SQL> select * from history;
+
+--LOGIN_USER           EVENT
+-------------------- --------------------------------------------------
+--DATE_TIME
+---------------------------------------------------------------------------
+--CSY2038ASS2          LOGOFF
+--12-APR-19 09.16.02.655000 PM
+
+--CSY2038ASS2          LOGON
+--12-APR-19 09.16.19.768000 PM
+

@@ -1,0 +1,186 @@
+/*
+Group Number: 25
+File Name: drop25.txt
+Group Members:  Shreejan Regmi - 18417132
+				Neetu Kumari Das- 18406487
+				Saurav Khatiwada - 18413649
+				Hira Bahadur Rana Kauchha - 18413703
+Module Name: Database 2
+Module Code: CSY2038			
+*/
+--@E:\CSY2038Ass2\drop25.txt;
+
+--FOREIGN KEYS' DROPS
+ALTER TABLE festivals
+DROP CONSTRAINT fk_f_festival_natures;
+
+ALTER TABLE festivals
+DROP CONSTRAINT fk_f_locations;
+
+ALTER TABLE festival_staff
+DROP CONSTRAINT fk_fs_staff;
+
+ALTER TABLE festival_staff
+DROP CONSTRAINT fk_fs_festivals;
+
+ALTER TABLE staff
+DROP CONSTRAINT fk_s_staff;
+
+--Testing if all the foreign keys are dropped
+SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_NAME LIKE 'FK%'; 
+
+
+--UNIQUE CONSTRAINTS' DROPS
+ALTER TABLE festival_natures
+DROP CONSTRAINT uc_festival_nature_name;
+
+--Testing if all the unique constraint is dropped
+SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_NAME LIKE 'U%';  
+
+--CHECK CONSTRAINTS' DROPS
+ALTER TABLE festival_natures
+DROP CONSTRAINT ck_f_nature_name;
+
+ALTER TABLE festivals
+DROP CONSTRAINT ck_festival_name;
+
+ALTER TABLE locations
+DROP CONSTRAINT ck_location_name_street;
+
+ALTER TABLE locations
+DROP CONSTRAINT ck_location_name_city;
+
+ALTER TABLE locations
+DROP CONSTRAINT ck_location_name_country;
+
+ALTER TABLE staff
+DROP CONSTRAINT ck_staff_fname;
+
+ALTER TABLE staff
+DROP CONSTRAINT ck_staff_lname;
+
+ALTER TABLE staff
+DROP CONSTRAINT ck_s_gender;
+
+ALTER TABLE addresses
+DROP CONSTRAINT ck_address_street;
+
+ALTER TABLE addresses
+DROP CONSTRAINT ck_address_city;
+
+ALTER TABLE addresses
+DROP CONSTRAINT ck_address_country;
+
+--Testing if all the check constraints are dropped
+SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_NAME LIKE 'CK%';
+
+--PRIMARY KEYS' DROPS
+ALTER TABLE festival_natures
+DROP CONSTRAINT pk_festival_natures;
+
+ALTER TABLE locations
+DROP CONSTRAINT pk_locations;
+
+ALTER TABLE festivals
+DROP CONSTRAINT pk_festivals;
+
+ALTER TABLE staff
+DROP CONSTRAINT pk_staff;
+
+ALTER TABLE festival_staff
+DROP CONSTRAINT pk_festival_staff;
+
+--Testing if all the primary keys are dropped
+SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_NAME LIKE 'PK%'; 
+
+
+--SEQUENCES' DROPS
+DROP SEQUENCE seq_f_nature_id;
+DROP SEQUENCE seq_location_id;
+DROP SEQUENCE seq_staff_id;
+
+--Testing if all sequences are dropped
+SELECT SEQUENCE_NAME FROM USER_SEQUENCES;
+
+--Triggers drop
+DROP TRIGGER trig_staff_dob_ck;
+DROP TRIGGER trig_locations_message;
+DROP TRIGGER trig_combined;
+DROP TRIGGER trig_schema_level;
+DROP TRIGGER trig_database_login;
+DROP TRIGGER trig_database_logoff;
+
+--Testing if all triggers are dropped
+SELECT TRIGGER_NAME FROM USER_TRIGGERS;
+
+--TABLES' DROPS
+DROP TABLE festival_staff;
+DROP TABLE addresses;
+DROP TABLE festivals;
+DROP TABLE staff;
+DROP TABLE festival_natures;
+DROP TABLE locations;
+DROP TABLE history;
+
+--Testing if all tables are dropped
+SELECT tname FROM TAB
+
+--TYPES' DROPS
+DROP TYPE festival_description_type;
+DROP TYPE f_activities_varray_type;
+DROP TYPE f_food_offerings_table_type;
+DROP TYPE contact_varray_type;
+DROP TYPE contact_type;
+DROP TYPE address_type;
+
+
+--Functions drop
+DROP FUNCTION func_count_festivals;
+DROP FUNCTION func_make_username;
+DROP FUNCTION func_staff_name;
+DROP FUNCTION func_staff_salary;
+DROP FUNCTION func_highest_ticket_price;
+DROP FUNCTION func_calculate_staff_age;
+DROP FUNCTION func_calc_retiring;
+
+
+--PROCEDURES DROP
+DROP PROCEDURE proc_insert_f_natures;
+DROP PROCEDURE proc_insert_locations;
+DROP PROCEDURE proc_insert_staff;
+DROP PROCEDURE proc_update_staff_salary;
+DROP PROCEDURE proc_delete_staff;
+DROP PROCEDURE proc_out_param;
+DROP PROCEDURE proc_out_in_param;
+DROP PROCEDURE proc_insert_history;
+
+--procedures used for functions
+DROP PROCEDURE proc_count_festivals;
+DROP PROCEDURE proc_output_username;
+DROP PROCEDURE proc_output_staff_data;
+DROP PROCEDURE proc_output_ticket_price;
+DROP PROCEDURE proc_test_calc_age;
+DROP PROCEDURE proc_calc_retiring;
+
+--procedures used for cursors
+DROP PROCEDURE proc_imp_del_staff;
+DROP PROCEDURE proc_exp_count_festivals;
+DROP PROCEDURE proc_exp_show_staff;
+
+--Views drop
+DROP VIEW view_staff_age_group;
+
+--Packages drop
+DROP PACKAGE pkg_leader_details;
+
+--Testing if all types are dropped
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS;
+
+PURGE RECYCLEBIN;
+
+--Final Test
+SELECT tname FROM TAB;
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS;
+SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS;
+SELECT TRIGGER_NAME FROM USER_TRIGGERS;
+SELECT SEQUENCE_NAME FROM USER_SEQUENCES;

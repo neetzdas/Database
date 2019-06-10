@@ -1,0 +1,317 @@
+/*
+Group Number: 25
+File Name: constraints_test25.txt
+Group Members:  Shreejan Regmi - 18417132
+				Neetu Kumari Das- 18406487
+				Saurav Khatiwada - 18413649
+				Hira Bahadur Rana Kauchha - 18413703
+Module Name: Database 2
+Module Code: CSY2038
+*/
+
+--@E:\CSY2038Ass2\constraints_test25.txt;
+
+--CHECKING THE CREATION OF CONSTRAINTS
+--Testing if all the primary keys are created
+SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_NAME LIKE 'PK%'; 
+--5 rows returned
+
+--Testing if all the foreign keys are created
+SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_NAME LIKE 'FK%';
+--5 rows returned
+
+--Testing if all the unique constraint is created
+SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_NAME LIKE 'UC%';
+--1 row returned
+
+--Testing if all the check constraints are created
+SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS WHERE CONSTRAINT_NAME LIKE 'CK%'; 
+--11 rows returned
+
+--TESTING THE INTEGRITY OF UNIQUE CONSTRAINT 
+--testing unique constraint uc_festival_nature_name
+--testing festival_natures table before executing insert query on festival_natures table
+SELECT f_nature_id,  f_nature_name FROM festival_natures;
+--6 rows selected
+
+--error should be thrown when two festival natures are added having same name
+INSERT INTO festival_natures
+VALUES (seq_f_nature_id.NEXTVAL, 'FOOD');
+--ERROR at line 1:
+--ORA-00001: unique constraint (CSY2038ASS2.UC_FESTIVAL_NATURE_NAME) violated
+--OK
+
+--checking if inserted
+SELECT f_nature_id,  f_nature_name FROM festival_natures;
+--6 rows selected
+
+--error should not be thrown when two festival natures are added having different name
+INSERT INTO festival_natures
+VALUES (seq_f_nature_id.NEXTVAL, 'DANCE');
+--1 row created
+
+--checking if inserted
+SELECT f_nature_id,  f_nature_name FROM festival_natures WHERE f_nature_name = 'DANCE';
+--1 row returned
+
+
+--TESTING CHECK CONSTRAINTS
+--testing constraint CK_F_NATURE_NAME for upper
+
+--testing festival_natures table before executing insert query on festival_natures table
+SELECT f_nature_id,  f_nature_name FROM festival_natures;
+--7 rows selected
+
+--error should be thrown when two festival having lowercase name is inserted
+INSERT INTO festival_natures
+VALUES (seq_f_nature_id.NEXTVAL, 'Beer');
+--ERROR at line 1:
+--ORA-02290: check constraint (CSY2038ASS2.CK_F_NATURE_NAME) violated
+--OK
+
+--checking if inserted
+SELECT f_nature_id,  f_nature_name FROM festival_natures;
+--7 rows selected
+
+--error should not be thrown when inserted in uppercase
+INSERT INTO festival_natures
+VALUES (seq_f_nature_id.NEXTVAL, 'BEER');
+--1 row created
+
+--checking if inserted
+SELECT f_nature_id,  f_nature_name FROM festival_natures WHERE f_nature_name = 'BEER';
+--1 row returned
+
+--testing constraint CK_FESTIVAL_NAME for upper
+--querying festivals table before running insert query
+SELECT festival_name , festival_date FROM festivals;
+--9 rows returned
+
+--inserting into festivals table keeping festival_name in lowercase
+INSERT INTO festivals(f_nature_id, location_id, festival_name, festival_date, ticket_price, festival_details) 
+VALUES(1, 9, 'State Cultural Festival', '9-MAY-2019', 1000.55,
+festival_description_type( 
+f_activities_varray_type('THEATRE SHOW', 'INTERVIEW'),'4 HOURS', f_food_offerings_table_type('JUICE', 'CHICKEN', 'DESSERT'))); 
+--ERROR at line 1:
+--ORA-02290: check constraint (CSY2038ASS2.CK_FESTIVAL_NAME) violated
+
+--checking if inserted
+SELECT festival_name , festival_date FROM festivals WHERE festival_name = 'State Cultural Festival';
+--no rows selected
+--not inserted
+
+--inserting into festivals table keeping festival_name in uppercase
+INSERT INTO festivals(f_nature_id, location_id, festival_name, festival_date, ticket_price, festival_details) 
+VALUES(1, 9, 'STATE CULTURAL FESTIVAL', '9-MAY-2019', 1000.55,
+festival_description_type( 
+f_activities_varray_type('THEATRE SHOW', 'INTERVIEW'),'4 HOURS', f_food_offerings_table_type('JUICE', 'CHICKEN', 'DESSERT'))); 
+--1 row created
+
+--checking if inserted
+SELECT festival_name , festival_date FROM festivals WHERE festival_name = 'STATE CULTURAL FESTIVAL';
+--1 row selected
+
+--checking constraint ck_location_name_street to check whether it works on varray
+--querying locations table before inserting
+SELECT l.location_id ID , l.location_name.street Street, l.location_name.city City, l.location_name.country Country   
+FROM locations l;
+
+--inserting into locations table keeping street in lowercase
+INSERT INTO locations
+VALUES(seq_location_id.NEXTVAL, address_type('67 Sesame Street', 'LONDON', 'UK'));
+--ERROR at line 1:
+--ORA-02290: check constraint (CSY2038ASS2.CK_LOCATION_NAME_STREET) violated
+--ok
+
+--checking if inserted
+SELECT l.location_id ID , l.location_name.street Street, l.location_name.city City, l.location_name.country Country   
+FROM locations l
+WHERE l.location_name.street = '67 Sesame Street';
+--no rows selected
+
+--inserting into locations table keeping street in uppercase
+INSERT INTO locations
+VALUES(seq_location_id.NEXTVAL, address_type('67 SESAME STREET', 'LONDON', 'UK'));
+--1 row created
+--OK
+
+--checking if inserted
+SELECT l.location_id ID , l.location_name.street Street, l.location_name.city City, l.location_name.country Country   
+FROM locations l
+WHERE l.location_name.street = '67 SESAME STREET';
+--1 row returned
+
+--testing constraint ck_location_name_city
+--querying locations table before inserting
+SELECT l.location_id ID , l.location_name.street Street, l.location_name.city City, l.location_name.country Country   
+FROM locations l;
+--9 rows returned
+
+--inserting into locations table keeping city in lowercase
+INSERT INTO locations
+VALUES(seq_location_id.NEXTVAL, address_type('67 SESAME STREET', 'london', 'UK'));
+--ERROR at line 1:
+--ORA-02290: check constraint (CSY2038ASS2.CK_LOCATION_NAME_CITY) violated
+
+--checking if inserted
+SELECT l.location_id ID , l.location_name.street Street, l.location_name.city City, l.location_name.country Country   
+FROM locations l
+WHERE l.location_name.city = 'london';
+--no rows selected
+
+--testing constraint ck_location_name_country
+--querying locations table before inserting
+SELECT l.location_id ID , l.location_name.street Street, l.location_name.city City, l.location_name.country Country   
+FROM locations l;
+--9 rows returned
+
+--inserting into locations table keeping country in lowercase
+INSERT INTO locations
+VALUES(seq_location_id.NEXTVAL, address_type('67 SESAME STREET', 'LONDON', 'uk'));
+--ERROR at line 1:
+--ORA-02290: check constraint (CSY2038ASS2.CK_LOCATION_NAME_COUNTRY) violated
+
+--checking if inserted
+SELECT l.location_id ID , l.location_name.street Street, l.location_name.city City, l.location_name.country Country   
+FROM locations l
+WHERE l.location_name.country = 'uk';
+--no rows selected
+
+
+--testing constraint ck_staff_fname
+--querying staff table before running insert query
+SELECT staff_id, staff_fname, staff_lname ,gender FROM staff;
+--12 rows returned
+
+--inserting into staff table keeping firstname in lowercase
+INSERT INTO staff(staff_id, staff_fname, staff_lname, leader_id, staff_salary, gender , staff_dob ,staff_contact, staff_address)
+SELECT seq_staff_id.NEXTVAL, 'sina', 'SUBEDI', 1, 4200.65, 'F' , '20-NOV-1988' , contact_varray_type(contact_type('+9779862076243', 'PRASHANT@GMAIL.COM'),
+																						contact_type('+9779800236622', 'PRASHANT@YAHOO.COM')), REF (a)
+FROM addresses a
+WHERE a.street='DURBAR MARG';
+--ERROR at line 1:
+--ORA-02290: check constraint (CSY2038ASS2.CK_S_FNAME) violated
+
+--checking if inserted
+SELECT staff_id, staff_fname, staff_lname ,gender FROM staff WHERE staff_fname ='sina';
+--no rows returned
+
+--testing constraint ck_staff_lname
+--querying staff table before running insert query
+SELECT staff_id, staff_fname, staff_lname ,gender FROM staff;
+--12 rows returned
+
+--inserting into staff table keeping lastname in lowercase
+INSERT INTO staff(staff_id, staff_fname, staff_lname, leader_id, staff_salary, gender , staff_dob ,staff_contact, staff_address)
+SELECT seq_staff_id.NEXTVAL, 'SINA', 'subedi', 1, 4200.65, 'F' , '20-NOV-1988' , contact_varray_type(contact_type('+9779862076243', 'PRASHANT@GMAIL.COM'),
+																						contact_type('+9779800236622', 'PRASHANT@YAHOO.COM')), REF (a)
+FROM addresses a
+WHERE a.street='DURBAR MARG';
+--ERROR at line 1:
+--ORA-02290: check constraint (CSY2038ASS2.CK_S_LNAME) violated
+
+--checking if inserted
+SELECT staff_id, staff_fname, staff_lname ,gender FROM staff WHERE staff_lname='subedi';
+--no rows returned
+
+--checking constraint ck_s_gender
+--querying staff table before running insert query
+SELECT staff_id, staff_fname, staff_lname ,gender FROM staff;
+--12 rows returned
+
+--inserting into staff table keeping gender other than M, F and O
+INSERT INTO staff(staff_id, staff_fname, staff_lname, leader_id, staff_salary, gender , staff_dob ,staff_contact, staff_address)
+SELECT seq_staff_id.NEXTVAL, 'PRASHANT', 'SUBEDI', 1, 4200.65, 'G' , '20-NOV-1988' , contact_varray_type(contact_type('+9779862076243', 'PRASHANT@GMAIL.COM'),
+																						contact_type('+9779800236622', 'PRASHANT@YAHOO.COM')), REF (a)
+FROM addresses a
+WHERE a.street='DURBAR MARG';
+--ERROR at line 1:
+--ORA-02290: check constraint (CSY2038ASS2.CK_S_GENDER) violated
+
+--checking if inserted
+SELECT staff_id, staff_fname, staff_lname ,gender FROM staff WHERE staff_fname ='PRASHANT' AND staff_lname='SUBEDI';
+--no rows returned
+
+--inserting into staff table keeping gender M
+INSERT INTO staff(staff_id, staff_fname, staff_lname, leader_id, staff_salary, gender , staff_dob ,staff_contact, staff_address)
+SELECT seq_staff_id.NEXTVAL, 'PRASHANT', 'SUBEDI', 1, 4200.65, 'M' , '20-NOV-1988' , contact_varray_type(contact_type('+9779862076243', 'PRASHANT@GMAIL.COM'),
+																						contact_type('+9779800236622', 'PRASHANT@YAHOO.COM')), REF (a)
+FROM addresses a
+WHERE a.street='DURBAR MARG';
+--1 row created.
+
+--checking if inserted
+SELECT staff_id, staff_fname, staff_lname ,gender FROM staff WHERE staff_fname ='PRASHANT' AND staff_lname='SUBEDI';
+--1 row returned
+
+--inserting into staff table keeping gender F
+INSERT INTO staff(staff_id, staff_fname, staff_lname, leader_id, staff_salary, gender , staff_dob ,staff_contact, staff_address)
+SELECT seq_staff_id.NEXTVAL, 'PRAMISHA', 'SUBEDI', 1, 4220.65, 'F' , '20-NOV-1987' , contact_varray_type(contact_type('+9778862076243', 'PRAMISHA@GMAIL.COM'),
+																						contact_type('+9778800236622', 'PRAMISHA@YAHOO.COM')), REF (a)
+FROM addresses a
+WHERE a.street='DURBAR MARG';
+--1 row created.
+
+--checking if inserted
+SELECT staff_id, staff_fname, staff_lname ,gender FROM staff WHERE staff_fname ='PRAMISHA' AND staff_lname='SUBEDI';
+--1 row returned
+
+--inserting into staff table keeping gender O
+INSERT INTO staff(staff_id, staff_fname, staff_lname, leader_id, staff_salary, gender , staff_dob ,staff_contact, staff_address)
+SELECT seq_staff_id.NEXTVAL, 'NIBESH', 'TRITAL', 1, 3211.65, 'O' , '20-NOV-1986' , contact_varray_type(contact_type('+9778892076243', 'NIBESH@GMAIL.COM'),
+																						contact_type('+9778800238622', 'NIBESH@YAHOO.COM')), REF (a)
+FROM addresses a
+WHERE a.street='DURBAR MARG';
+--1 row created.
+
+--checking if inserted
+SELECT staff_id, staff_fname, staff_lname ,gender FROM staff WHERE staff_fname ='NIBESH' AND staff_lname='TRITAL';
+--1 row returned
+
+--Testing constraint ck_address_street
+--querying addresses table before executing insert query 
+SELECT street, city, country FROM addresses;
+--5 rows returned
+
+--executing insert query keeping street in lowercase
+INSERT INTO addresses(street, city, country)
+VALUES ('St. peters road', 'ALABAMA' ,'USA');
+--ERROR at line 1:
+--ORA-02290: check constraint (CSY2038ASS2.CK_ADDRESS_STREET) violated
+
+--checking if inserted
+SELECT street, city, country FROM addresses;
+--5 rows returned
+--not inserted
+
+--Testing constraint ck_address_city
+--querying addresses table before executing insert query 
+SELECT street, city, country FROM addresses;
+--5 rows returned
+
+--executing insert query keeping city in lowercase
+INSERT INTO addresses(street, city, country)
+VALUES ('ST. PETERS ROAD', 'alabama' ,'USA');
+--ERROR at line 1:
+--ORA-02290: check constraint (CSY2038ASS2.CK_ADDRESS_CITY) violated
+
+--checking if inserted
+SELECT street, city, country FROM addresses;
+--5 rows returned
+--not inserted
+
+--Testing constraint ck_address_country
+--querying addresses table before executing insert query 
+SELECT street, city, country FROM addresses;
+--5 rows returned
+
+--executing insert query keeping country in lowercase
+INSERT INTO addresses(street, city, country)
+VALUES ('ST. PETERS ROAD', 'ALABAMA' ,'usa');
+--ERROR at line 1:
+--ORA-02290: check constraint (CSY2038ASS2.CK_ADDRESS_COUNTRY) violated
+
+--checking if inserted
+SELECT street, city, country FROM addresses;
+--5 rows returned
+--not inserted

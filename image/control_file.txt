@@ -1,0 +1,14 @@
+LOAD DATA
+INFILE 'data_file.txt'
+APPEND
+	INTO TABLE STAFF
+	FIELDS TERMINATED BY ','
+	(STAFF_ID             "seq_staff_id.NEXTVAL",
+	 STAFF_FNAME            ,
+	 STAFF_LNAME		,
+	 LEADER_ID              ,
+	 STAFF_SALARY           ,
+	 GENDER			,
+	 STAFF_DOB 		,
+	 STAFF_IMAGE_NAME      FILLER CHAR(100),
+	 STAFF_IMAGE           LOBFILE(STAFF_IMAGE_NAME) TERMINATED BY EOF)	

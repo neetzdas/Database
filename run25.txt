@@ -1,0 +1,41 @@
+/*
+Group Number: 25
+File Name: run25.txt
+Group Members:  Shreejan Regmi - 18417132
+				Neetu Kumari Das- 18406487
+				Saurav Khatiwada - 18413649
+				Hira Bahadur Rana Kauchha - 18413703
+Module Name: Database 2
+Module Code: CSY2038			
+*/
+
+--@E:\CSY2038Ass2\run25.txt;
+
+--Run query to run whole script
+
+--Create script
+@E:\CSY2038Ass2\create25.txt;
+
+--Constraint script
+@E:\CSY2038Ass2\constraints25.txt;
+
+--Insert script
+@E:\CSY2038Ass2\insert25.txt;
+
+--Procedure script
+@E:\CSY2038Ass2\procedures25.txt;
+
+--Functions script
+@E:\CSY2038Ass2\functions25.txt;
+
+--Triggers script
+@E:\CSY2038Ass2\triggers25.txt;
+
+--Cursors script
+@E:\CSY2038Ass2\cursors25.txt;
+
+--Views script
+@E:\CSY2038Ass2\views25.txt;
+
+--Packages script
+@E:\CSY2038Ass2\packages25.txt;

@@ -1,0 +1,154 @@
+/*
+Group Number: 25
+File Name: cursors_test25.txt
+Group Members:  Shreejan Regmi - 18417132
+				Neetu Kumari Das- 18406487
+				Saurav Khatiwada - 18413649
+				Hira Bahadur Rana Kauchha - 18413703
+Module Name: Database 2
+Module Code: CSY2038			
+*/
+
+--@E:\CSY2038Ass2\cursors_test25.txt;
+
+--to display output on the screen
+SET SERVEROUTPUT ON
+
+--TEST OF CURSOR 1
+--checking the creation of procedure proc_imp_del_staff
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_NAME ='PROC_IMP_DEL_STAFF';
+--1 row returned
+--procedure created
+
+--querying staff table before executing procedure proc_imp_del_staff
+SELECT s.staff_id, s.staff_fname, s.staff_lname FROM staff s WHERE s.staff_fname='JOHN' AND s.staff_lname='LENNON';
+--1 row returned
+
+--executing procedure proc_imp_del_staff with parameters JOHN and LENNON
+EXECUTE proc_imp_del_staff('JOHN', 'LENNON');
+--Executed successfully
+--OUTPUT: You deleted JOHN LENNON
+
+--querying staff table after executing procedure proc_imp_del_staff
+SELECT s.staff_id, s.staff_fname, s.staff_lname FROM staff s WHERE s.staff_fname='JOHN' AND s.staff_lname='LENNON';
+--no rows selected
+--Staff deleted
+
+--querying staff table before executing procedure proc_imp_del_staff
+SELECT s.staff_id, s.staff_fname, s.staff_lname FROM staff s;
+--9 rows returned
+
+--executing procedure proc_imp_del_staff with parameters MARTY and FRIEDMAN which is not present in staff table
+EXECUTE proc_imp_del_staff('MARTY', 'FRIEDMAN');
+--Executed successfully
+--OUTPUT: NO SUCH STAFF FOUND
+
+--querying staff table after executing procedure proc_imp_del_staff
+SELECT s.staff_id, s.staff_fname, s.staff_lname FROM staff s;
+--9 rows returned
+
+--TEST OF CURSOR 2
+--checking the creation of procedure proc_exp_count_festivals
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_NAME ='PROC_EXP_COUNT_FESTIVALS';
+--1 row returned
+--procedure created
+
+--cheking the ticket price of festivals before executing proc_exp_count_festivals
+SELECT festival_name, ticket_price FROM festivals;
+--9 rows returned
+
+--executing procedure proc_exp_count_festivals with value in range between minimum and maximum
+EXECUTE proc_exp_count_festivals(1150);
+--OUTPUT:
+--Festival Name : SARASWATI PUJA Ticket Price: 4000.2
+--Festival Name : METALLICA REUNION Ticket Price: 2000.9
+--Festival Name : METALLICA REUNION Ticket Price: 1400.8
+--Festival Name : FOOD HUNT FEST Ticket Price: 1200.5
+--Festival Name : HORROR FILM FESTIVAL Ticket Price: 1800.55
+--The number of festivals with ticket price greater than 1150 is 5
+
+--executing procedure proc_exp_count_festivals with value equal to maximum
+EXECUTE proc_exp_count_festivals(4000.2);
+--OUTPUT:
+--The number of festivals with ticket price greater than 4000.2 is 0
+
+--executing procedure proc_exp_count_festivals with value greater than maximum
+EXECUTE proc_exp_count_festivals(10000);
+--OUTPUT:
+--The number of festivals with ticket price greater than 10000 is 0
+
+--executing procedure proc_exp_count_festivals with value equal to minimum
+EXECUTE proc_exp_count_festivals(420.69);
+--OUTPUT:
+--Festival Name : SARASWATI PUJA Ticket Price: 4000.2
+--Festival Name : METALLICA REUNION Ticket Price: 2000.9
+--Festival Name : FOOD HUNT FEST Ticket Price: 900.5
+--Festival Name : HORROR FILM FESTIVAL Ticket Price: 1100.55
+--Festival Name : METALLICA REUNION Ticket Price: 1400.8
+--Festival Name : METALLICA REUNION Ticket Price: 1105.5
+--Festival Name : FOOD HUNT FEST Ticket Price: 1200.5
+--Festival Name : HORROR FILM FESTIVAL Ticket Price: 1800.55
+--The number of festivals with ticket price greater than 420.69 is 8
+
+--executing procedure proc_exp_count_festivals with value lesser than minimum
+EXECUTE proc_exp_count_festivals(1);
+--OUTPUT:
+--Festival Name : SARASWATI PUJA Ticket Price: 4000.2
+--Festival Name : METALLICA REUNION Ticket Price: 2000.9
+--Festival Name : FOOD HUNT FEST Ticket Price: 900.5
+--Festival Name : HORROR FILM FESTIVAL Ticket Price: 1100.55
+--Festival Name : ROCKET SCIENCE FEST Ticket Price: 420.69
+--Festival Name : METALLICA REUNION Ticket Price: 1400.8
+--Festival Name : METALLICA REUNION Ticket Price: 1105.5
+--Festival Name : FOOD HUNT FEST Ticket Price: 1200.5
+--Festival Name : HORROR FILM FESTIVAL Ticket Price: 1800.55
+--The number of festivals with ticket price greater than 1 is 9
+
+--TEST OF CURSOR 3
+--checking the creation of procedure proc_exp_show_staff
+SELECT OBJECT_NAME, OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_NAME ='PROC_EXP_SHOW_STAFF';
+--1 row returned
+--procedure created
+
+--cheking the salary of staff before executing proc_exp_show_staff
+SELECT staff_fname||' '||staff_lname AS staff_name, staff_salary
+FROM staff; 
+--8 rows returned
+
+--executing procedure proc_exp_show_staff with value in range between minimum and maximum
+EXECUTE proc_exp_show_staff(3300);
+--OUTPUT:
+--Staff AAYUSH MOKTAN has salary 2000.56
+--Staff HIRA KAUCHHA has salary 2200.2
+
+--executing procedure proc_exp_show_staff with value equal to maximum
+EXECUTE proc_exp_show_staff(9000.79);
+--OUTPUT:
+--Staff AAYUSH MOKTAN has salary 2000.56
+--Staff HIRA KAUCHHA has salary 2200.2
+--Staff SHREYA THAPA has salary 8240.8
+--Staff SAMI ADHIKARI has salary 5500.65
+--Staff JOHN BONHAM has salary 4222.56
+--Staff GEORGE MICHAEL has salary 4444.56
+--Staff PAUL MCCARTNEY has salary 4444.56
+
+--executing procedure proc_exp_show_staff with value greater than maximum
+EXECUTE proc_exp_show_staff(10000);
+--OUTPUT:
+--Staff AAYUSH MOKTAN has salary 2000.56
+--Staff HIRA KAUCHHA has salary 2200.2
+--Staff SALON GURUNG has salary 9000.79
+--Staff SHREYA THAPA has salary 8240.8
+--Staff SAMI ADHIKARI has salary 5500.65
+--Staff JOHN BONHAM has salary 4222.56
+--Staff GEORGE MICHAEL has salary 4444.56
+--Staff PAUL MCCARTNEY has salary 4444.56
+
+--executing procedure proc_exp_show_staff with value equal to minimum
+EXECUTE proc_exp_show_staff(1200.5);
+--OUTPUT:
+--NO SUCH STAFF FOUND
+
+--executing procedure proc_exp_show_staff with value less than minimum
+EXECUTE proc_exp_show_staff(10);
+--OUTPUT:NO SUCH STAFF FOUND

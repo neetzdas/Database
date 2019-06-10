@@ -1,0 +1,137 @@
+/*
+Group Number: 25
+File Name: constraints25.txt
+Group Members:  Shreejan Regmi - 18417132
+				Neetu Kumari Das- 18406487
+				Saurav Khatiwada - 18413649
+				Hira Bahadur Rana Kauchha - 18413703
+Module Name: Database 2
+Module Code: CSY2038			
+*/
+
+
+--@E:\CSY2038Ass2\constraints25.txt;
+
+--PRIMARY KEY CONSTRAINTS
+--creating primary key of festival_natures table
+ALTER TABLE festival_natures
+ADD CONSTRAINT pk_festival_natures
+PRIMARY KEY (f_nature_id);
+
+--creating primary key of locations table
+ALTER TABLE locations
+ADD CONSTRAINT pk_locations
+PRIMARY KEY (location_id);
+
+--creating primary key of festivals table
+ALTER TABLE festivals
+ADD CONSTRAINT pk_festivals
+PRIMARY KEY (f_nature_id, location_id);
+
+--creating primary key of staff table
+ALTER TABLE staff
+ADD CONSTRAINT pk_staff
+PRIMARY KEY (staff_id);
+
+--creating primary key of festival_staff table
+ALTER TABLE festival_staff
+ADD CONSTRAINT pk_festival_staff
+PRIMARY KEY (staff_id, f_nature_id, location_id);
+
+--FOREIGN KEY CONSTRAINTS
+--adding foreign key to festivals table referencing festival_natures table
+ALTER TABLE festivals
+ADD CONSTRAINT fk_f_festival_natures
+FOREIGN KEY (f_nature_id)
+REFERENCES festival_natures(f_nature_id);
+
+--adding foreign key to festivals table referencing locations table
+ALTER TABLE festivals
+ADD CONSTRAINT fk_f_locations
+FOREIGN KEY (location_id)
+REFERENCES locations(location_id);
+
+--adding foreign key to festival_staff table referencing staff table
+ALTER TABLE festival_staff
+ADD CONSTRAINT fk_fs_staff
+FOREIGN KEY (staff_id)
+REFERENCES staff(staff_id);
+
+--adding foreign key to festival_staff table referencing festivals table
+ALTER TABLE festival_staff
+ADD CONSTRAINT fk_fs_festivals 
+FOREIGN KEY (f_nature_id,  location_id )
+REFERENCES festivals(f_nature_id, location_id);
+
+--adding foreign key to staff table referencing staff table(recursive relation)
+ALTER TABLE staff
+ADD CONSTRAINT fk_s_staff
+FOREIGN KEY(leader_id)
+REFERENCES staff(staff_id);
+
+--UNIQUE CONSTRAINTS
+--adding unique constraint to festival_natures table on column f_nature_name
+ALTER TABLE festival_natures
+ADD CONSTRAINT uc_festival_nature_name
+UNIQUE(f_nature_name);
+
+--CHECK CONSTRAINTS
+--festival_natures
+--adding check constraint(upper) to festival_natures table on column f_nature_name
+ALTER TABLE festival_natures
+ADD CONSTRAINT ck_f_nature_name
+CHECK (f_nature_name = upper(f_nature_name));
+
+--festivals
+--adding check constraint(upper) to festivals table on column festival_name
+ALTER TABLE festivals
+ADD CONSTRAINT ck_festival_name
+CHECK (festival_name= upper(festival_name));
+
+--locations
+--adding check constraint(upper) to locations table on column location_name.street
+ALTER TABLE locations 
+ADD CONSTRAINT ck_location_name_street
+CHECK (location_name.street= upper(location_name.street));
+
+--adding check constraint(upper) to locations table on column location_name.city
+ALTER TABLE locations 
+ADD CONSTRAINT ck_location_name_city
+CHECK (location_name.city= upper(location_name.city));
+
+--adding check constraint(upper) to locations table on column location_name.country
+ALTER TABLE locations 
+ADD CONSTRAINT ck_location_name_country
+CHECK (location_name.country= upper(location_name.country));
+
+--staff
+--adding check constraint(upper) to staff on column staff_fname
+ALTER TABLE staff
+ADD CONSTRAINT ck_staff_fname
+CHECK (staff_fname = upper(staff_fname));
+
+--adding check constraint(upper) to staff table on column staff_lname
+ALTER TABLE staff
+ADD CONSTRAINT ck_staff_lname
+CHECK (staff_lname = upper(staff_lname));
+
+--adding check constraint(value in) to staff table on column gender
+ALTER TABLE staff
+ADD CONSTRAINT ck_s_gender
+CHECK (gender IN ('F', 'M', 'O'));
+
+--addresses
+--adding check constraint(upper) to addresses table on column street
+ALTER TABLE addresses
+ADD CONSTRAINT ck_address_street
+CHECK (street= upper(street));
+
+--adding check constraint(upper) to addresses table on column city
+ALTER TABLE addresses
+ADD CONSTRAINT ck_address_city
+CHECK (city= upper(city));
+
+--adding check constraint(upper) to addresses table on column country
+ALTER TABLE addresses
+ADD CONSTRAINT ck_address_country
+CHECK (country= upper(country));

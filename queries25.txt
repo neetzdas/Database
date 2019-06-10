@@ -1,0 +1,638 @@
+/*
+Group Number: 25
+File Name: queries25.txt
+Group Members:  Shreejan Regmi - 18417132
+				Neetu Kumari Das- 18406487
+				Saurav Khatiwada - 18413649
+				Hira Bahadur Rana Kauchha - 18413703
+Module Name: Database 2
+Module Code: CSY2038			
+*/
+
+--@E:\CSY2038Ass2\queries25.txt
+
+--Set line size for output
+SET LIN 500;
+
+--view all the tables present
+--7 rows returned
+SELECT tname FROM tab;
+
+--view all the sequences 
+--4 rows returned
+SELECT sequence_name FROM user_sequences;
+
+--view all the constraints
+SELECT constraint_name FROM user_constraints;
+
+--viewing all primary keys only
+SELECT constraint_name FROM user_constraints WHERE constraint_name LIKE 'PK%';
+
+--viewing all foreign keys only
+SELECT constraint_name FROM user_constraints WHERE constraint_name LIKE 'FK%';
+
+--viewing all check constriants only
+SELECT constraint_name FROM user_constraints WHERE constraint_name LIKE 'CK%';
+
+--viewing all unique constraints only
+SELECT constraint_name FROM user_constraints WHERE constraint_name LIKE 'UC%';
+
+--viewing all objects 
+SELECT OBJECT_NAME FROM user_objects;
+
+--viewing only object types
+SELECT OBJECT_NAME FROM user_objects WHERE OBJECT_NAME LIKE '%TYPE';
+
+--Viewing the structure of all tables
+--describing festival_natures table
+DESC festival_natures;
+
+--describing locations table
+DESC locations;
+
+--describing staff table
+DESC staff;
+
+--describing festivals table
+DESC festivals;
+
+--describing festival_staff table
+DESC festival_staff;
+
+--describing addresses object table
+DESC addresses;
+
+--describing f_food_offerings_table;
+DESC f_food_offerings_table;
+
+--querying all rows of festival_natures table
+SELECT * FROM festival_natures;
+
+--querying all rows of locations table
+SELECT * FROM locations;
+
+--querying all rows of staff table
+SELECT * FROM staff;
+
+--quering all rows of festivals table
+SELECT * FROM festivals;
+
+--quering all rows of festival_staff table
+SELECT * FROM festival_staff;
+
+--quering all rows of festival_staff table
+SELECT * FROM addresses;
+
+--viewing the structure of all object_types
+--viewing the structure of address_type
+DESC address_type;
+
+--viewing the structure of contact_type
+DESC contact_type;
+
+--viewing the structure of contact_varray_type
+DESC contact_varray_type;
+
+--viewing the structure of f_activities_varray_type
+DESC f_activities_varray_type;
+
+--viewing the structure of f_food_offerings_table_type
+DESC f_food_offerings_table_type;
+
+--viewing the structure of festival_description_type
+DESC festival_description_type;
+
+--PROJECTIONS
+--projection of 2 columns of festival_natures table;
+SELECT fn.f_nature_id, fn.f_nature_name
+FROM festival_natures fn;
+
+--projection of 3 columns staff table using column alias
+SELECT s.staff_id ID,  s.staff_fname "First Name", s.staff_salary Salary
+FROM staff s;
+
+--using order by to view staff
+SELECT s.staff_id ID, s.staff_fname "First Name"
+FROM staff s
+ORDER BY s.staff_fname DESC;
+
+--formatting location_name column;
+COLUMN location_name FORMAT A50;
+
+--querying locations table with UDT with poor method
+SELECT l.location_id, l.location_name 
+FROM locations l;
+
+--querying locations table with UDT with best method
+SELECT l.location_id ID , l.location_name.street Street, l.location_name.city City, l.location_name.country Country   
+FROM locations l;
+
+--formatting staff_address column
+COLUMN staff_address FORMAT A50;
+
+--querying staff table with ref column with poor method
+SELECT s.staff_id, s.staff_fname, s.staff_address
+FROM staff s;
+
+--formatting derefed staff_address column
+COLUMN DEREF(s.staff_address) FORMAT A52;
+
+--querying staff table with ref column with better method
+SELECT s.staff_id, s.staff_fname, DEREF(s.staff_address)
+FROM staff s;
+
+--formatting column city and country
+COLUMN City FORMAT A20;
+COLUMN Country FORMAT A10;
+
+--querying staff table with ref column with best method
+SELECT s.staff_id ID, s.staff_fname Firstname, s.staff_lname Lastname, s.staff_address.street Street, s.staff_address.city City , s.staff_address.country Country
+FROM staff s;
+
+COLUMN staff_contact FORMAT A50;
+--querying staff table with varray column with poor method
+SELECT s.staff_id, s.staff_fname, s.staff_contact
+FROM staff s;
+
+--querying staff table with varray column with best method
+SELECT s.staff_id ID, s.staff_fname, sc.phone Phone, sc.email Email
+FROM staff s, TABLE(s.staff_contact) sc;
+
+--querying all columns of staff table with best method
+SELECT s.staff_id ID, s.staff_fname Firstname, s.staff_lname Lastname, s.leader_id LeaderID, s.staff_salary Salary, s.gender Gender, s.staff_dob DOB, c.phone Phone, c.email Email, s.staff_address.street Street, s.staff_address.city City , s.staff_address.country Country
+FROM staff s, TABLE(s.staff_contact) c;
+
+COLUMN gender FORMAT A6;
+COLUMN Phone FORMAT A15;
+COLUMN Email FORMAT A19;
+COLUMN Street FORMAT A20;
+COLUMN City FORMAT A15;
+COLUMN Country FORMAT A10;
+
+--Citation: (Docs.oracle.com, 2019) 
+BREAK ON ID ON FIRSTNAME ON LASTNAME ON LEADER_ID ON LEADER ON SALARY ON GENDER ON DOB ON STREET ON CITY ON COUNTRY SKIP 1;
+BREAK ON ID SKIP 1;
+--querying all columns of staff table with join to output name of leader
+SELECT s1.staff_id ID, s1.staff_fname Firstname, s1.staff_lname Lastname, s1.leader_id, s2.staff_fname Leader, s1.staff_salary Salary, s1.gender Gender, s1.staff_dob DOB ,sc.phone Phone, sc.email Email,
+		s1.staff_address.street Street, s1.staff_address.city City , s1.staff_address.country Country
+FROM staff s1
+LEFT JOIN staff s2
+ON s1.leader_id=s2.staff_id,
+TABLE(s1.staff_contact) sc
+ORDER BY s1.staff_id ASC;
+
+--formatting columns
+COLUMN festival_name FORMAT A15;
+COLUMN festival_date FORMAT A10;
+COLUMN festival_details FORMAT A25;
+
+--querying festivals table with nested table and varray in another object type with poor method
+SELECT f.festival_name, f.festival_date, f.ticket_price, f.festival_details
+FROM festivals f;
+
+COLUMN Name FORMAT A18;
+COLUMN FDate FORMAT A10;
+COLUMN Activities FORMAT A15;
+COLUMN "RUN TIME" FORMAT A8;
+COLUMN FOODS FORMAT A30;
+--querying festivals table with nested table and varray in another object type with better method
+SELECT f.festival_name Name, f.festival_date FDate, f.ticket_price Price, f.festival_details.activities Activities, f.festival_details.running_time "RUN TIME", f.festival_details.food Foods
+FROM festivals f;
+
+--querying festivals table with nested table and varray in another object type with best method
+SELECT f.festival_name Name, f.festival_date FDate, f.ticket_price Price, a.COLUMN_VALUE Activities , f.festival_details.running_time "RUN TIME", f.COLUMN_VALUE Foods
+FROM festivals f, TABLE(f.festival_details.activities) a, TABLE(f.festival_details.food) f;
+
+
+BREAK ON Nature ON Street ON City ON Country ON Name ON FDate ON Price ON "RUN TIME" ON Activities SKIP 1;
+--querying all columns from festivals table with join
+SELECT fn.f_nature_name Nature, l.location_name.street Street, l.location_name.city City, l.location_name.country Country, f.festival_name Name, f.festival_date FDate, f.ticket_price Price, a.COLUMN_VALUE Activities , f.festival_details.running_time "RUN TIME", f.COLUMN_VALUE Foods
+FROM festivals f
+JOIN festival_natures fn
+ON f.f_nature_id=fn.f_nature_id
+JOIN locations l
+ON f.location_id=l.location_id, 
+TABLE(f.festival_details.activities) a, 
+TABLE(f.festival_details.food) f;
+
+--querying nested table only
+SELECT VALUE(f)
+FROM THE(
+	SELECT f.festival_details.food
+	FROM festivals f
+	WHERE f.f_nature_id=2
+	AND f.location_id=2)f;
+
+--quering ref OID only
+SELECT REF(a)
+FROM addresses a
+WHERE a.street='DURBAR MARG'; 
+
+--RESTRICTIONS Queries
+--matching a predicate
+--1 row returned
+SELECT l.location_id ID , l.location_name.street Street, l.location_name.city City, l.location_name.country Country   
+FROM locations l
+WHERE l.location_name.country = 'NEPAL'
+ORDER BY l.location_name.city DESC;
+
+--in varray 
+--1 row returned
+--quering all festivals which has photography as one of its activities
+SELECT f.festival_name Name, a.COLUMN_VALUE Activities , f.festival_details.running_time "RUN TIME"
+FROM festivals f, TABLE(f.festival_details.activities) a
+WHERE a.COLUMN_VALUE='PHOTOGRAPHY';
+
+--command to return all festivals which is only after 1 Jan 2013
+SELECT f.festival_name Name, f.festival_date FDate,  f.festival_details.running_time "RUN TIME"
+FROM festivals f
+WHERE f.festival_date>'1-JAN-2013';
+
+--command to return all staff whose salary is greater than 2500
+SELECT s.staff_id ID, s.staff_fname Firstname, s.staff_lname Lastname, s.staff_salary Salary
+FROM staff s
+WHERE s.staff_salary<2500;
+
+--matching a pattern
+--querying addresses table using % wildcard / returning all addresses whose country name starts with U
+SELECT a.street, a.city , a.country
+FROM addresses a
+WHERE a.country LIKE 'U%';
+
+--querying festival_nature table using _ wildcard / returning all festival natures whose name starts with F and has 4 letters
+SELECT fn.f_nature_id ID, fn.f_nature_name Name
+FROM festival_natures fn
+WHERE fn.f_nature_name LIKE 'F___';
+
+--querying addresses table using IN keyword /  returning all addresses whose city is either boston or nems
+SELECT a.street, a.city , a.country
+FROM addresses a
+WHERE a.city IN ('BOSTON', 'NEMS');
+
+--querying staff table with runtime parameter 
+--possible valid inputs -F or M
+SELECT s.staff_id ID , s.staff_fname Firstname, s.gender Gender
+FROM staff s
+WHERE s.gender = '&gender'
+ORDER BY s.staff_id DESC;
+
+--querying using ranged condition using BETWEEN / returns all staff with salary between 1000 and 5000
+SELECT s.staff_id , s.staff_fname, s.staff_lname, s.staff_salary
+FROM staff s
+WHERE s.staff_salary BETWEEN 1000 AND 5000;
+
+--querying using ALL 
+SELECT s.staff_id , s.staff_fname, s.staff_salary
+FROM staff s
+WHERE s.staff_salary > ALL(1000, 5000);
+
+--querying using ANY
+SELECT s.staff_id , s.staff_fname, s.staff_salary
+FROM staff s
+WHERE s.staff_salary > ANY(2100, 5000);
+
+--querying using SOME
+SELECT s.staff_id , s.staff_fname, s.staff_salary
+FROM staff s
+WHERE s.staff_salary > SOME(2000, 5000);
+
+--NEGATIVE CONDITIONS
+-- != operator / returns all festivals that does not have photography as one of its activities
+SELECT f.festival_name Name, a.COLUMN_VALUE Activities , f.festival_details.running_time "RUN TIME"
+FROM festivals f, TABLE(f.festival_details.activities) a
+WHERE a.COLUMN_VALUE!='PHOTOGRAPHY';
+
+-- NOT LIKE with % / returns all addresses that does not have a country name starting with U
+SELECT a.street, a.city , a.country
+FROM addresses a
+WHERE a.country NOT LIKE 'U%';
+
+--NOT LIKE with _ wildcard / returning all festival natures except the name that starts with F and has 4 letters
+SELECT fn.f_nature_id ID, fn.f_nature_name Name
+FROM festival_natures fn
+WHERE fn.f_nature_name NOT LIKE 'F___';
+
+--NOT IN keyword /  returning all addresses except those whose city is either boston or nems
+SELECT a.street, a.city , a.country
+FROM addresses a
+WHERE a.city NOT IN ('BOSTON', 'NEMS');
+
+--NOT BETWEEN / returns all staff with salary except the ones with salary between 1000 and 5000
+SELECT s.staff_id , s.staff_fname, s.staff_salary
+FROM staff s
+WHERE s.staff_salary NOT BETWEEN 1000 AND 5000;
+
+--MULTIPLE CONDITIONS WHERE CLAUSE
+--returns all staffs that are either female and has salary less than 9000/greater than 1000 or staff that live in city starting with L
+--also uses AND and OR in one query
+SELECT s.staff_id ID, s.staff_fname Firstname, s.gender Gender, s.staff_salary, s.staff_address.city
+FROM staff s
+WHERE (s.staff_salary BETWEEN 1000 AND 9000
+AND s.gender='F')
+OR s.staff_address.city LIKE 'L%'
+ORDER BY s.staff_fname DESC;
+
+--FUNCTIONS
+--using COUNT function to get the number of countries in addresses table
+SELECT COUNT(a.country)
+FROM addresses a;
+
+--using DISTINCT keyword to get only unique countries from addresses
+SELECT DISTINCT a.country
+FROM addresses a;
+
+--using COUNT and DISTINCT keyword to get number unique entries only
+SELECT COUNT(DISTINCT a.country)
+FROM addresses a; 
+
+--using MAX function to get max ticket price of festival
+--returns 4000.2
+SELECT MAX(f.ticket_price)
+FROM festivals f;
+
+--MIN function with NESTED QUERY to get minimum salary of staff who is female
+SELECT s.staff_fname, s.staff_salary
+FROM staff s
+WHERE s.staff_salary=(
+	SELECT MIN(st.staff_salary)
+	FROM staff st
+	WHERE st.gender='F'
+);
+--using AVG function to return average of ticket prices of festivals with avg festival price greater than 1000
+SELECT f.festival_name, AVG(f.ticket_price)
+FROM festivals f
+GROUP BY f.festival_name
+HAVING AVG(f.ticket_price)>1000
+ORDER BY AVG(f.ticket_price) ASC;
+
+--using SUM to return total salary of all the staff
+SELECT SUM(s.staff_salary)
+FROM staff s;
+
+--using SUM to return total sum of ticket price of a festival
+SELECT f.festival_name Name, SUM(f.ticket_price) "Sum", AVG(f.ticket_price) "AVG"
+FROM festivals f
+GROUP BY f.festival_name
+HAVING f.festival_name='METALLICA REUNION';
+
+--using CEIL, FLOOR, ROUND, TRUNC in one query to return ticket price
+SELECT f.ticket_price Normal , CEIL(f.ticket_price) "Ceil", FLOOR(f.ticket_price) "Floor", ROUND(f.ticket_price) "Round", TRUNC(f.ticket_price) "Trunc"
+FROM festivals f;
+
+--using CEIL, FLOOR, ROUND, TRUNC with MAX function
+SELECT MAX(f.ticket_price) Normal , CEIL(MAX(f.ticket_price)) "Ceil", FLOOR(MAX(f.ticket_price)) "Floor", ROUND(MAX(f.ticket_price)) "Round", TRUNC(MAX(f.ticket_price)) "Trunc"
+FROM festivals f;
+ 
+--using NESTED QUERY with MAX function to display the name, gender and salary of staff with highest salary
+SELECT s.staff_fname Firstname, s.staff_salary Salary, CEIL(s.staff_salary) "Ceil", FLOOR(s.staff_salary) "Floor", ROUND(s.staff_salary) "Round", TRUNC(s.staff_salary) "Trunc" 
+FROM staff s
+WHERE s.staff_salary=(
+	SELECT MAX(staff_salary)
+	FROM staff
+);
+
+--using NESTED QUERY with rownum to return name, gender and salary of staff with highest salary
+SELECT *
+FROM(
+	SELECT staff_fname, gender, staff_salary
+	FROM staff
+	ORDER BY staff_salary DESC)
+WHERE ROWNUM<=1;
+
+--using MOD, REMAINDER, SQRT, POWER
+SELECT s.staff_fname Firstname, s.staff_salary Salary, MOD(s.staff_salary, 2) "MOD", REMAINDER(s.staff_salary, 2) "Remainder", SQRT(s.staff_salary) "Square Root", POWER(s.staff_salary,2) "Power(2)"
+FROM staff s
+WHERE s.staff_id=2;
+
+--CHARACTER FUNCTIONS
+--CONCAT to show hello with staff name
+SELECT CONCAT('HELLO ', CONCAT(CONCAT(s.staff_fname, ' '), s.staff_lname)) "Greeting"
+FROM staff s;
+
+--CONCAT, SUBSTR, LOWER to show hello username
+SELECT CONCAT('HELLO ', LOWER(CONCAT(SUBSTR(staff_fname,1,3), SUBSTR(staff_lname,1,3)))) "Greeting Username"
+FROM staff;
+
+--CONCAT, SUBSTR, HIGHER to show hello username
+SELECT CONCAT('HELLO ', UPPER(CONCAT(SUBSTR(staff_fname,1,3), SUBSTR(staff_lname,1,3)))) "Greeting Username"
+FROM staff;
+
+--query to show initial caps of firstname and lastname and removing trailing ' ' from firstname
+SELECT CONCAT(INITCAP(SUBSTR(TRIM(TRAILING ' ' FROM staff_fname), 1, 3)), INITCAP(SUBSTR(staff_lname, 1, 3))) "InitCaps"
+FROM staff;
+
+--NESTED QUERIES
+--returns staff's id, firstname and lastname residing in boston
+SELECT s.staff_id, s.staff_fname, s.staff_lname, s.staff_address.city
+FROM staff s
+WHERE s.staff_address.city =(
+	SELECT city 
+	FROM addresses 
+	WHERE city='BOSTON'
+);
+
+--returns staff that are not residing in Nepal or Canada
+SELECT s.staff_id, s.staff_fname, s.staff_lname, s.staff_address.country
+FROM staff s
+WHERE s.staff_address.country IN(
+	SELECT country 
+	FROM addresses 
+	WHERE country NOT IN('NEPAL', 'CANADA')
+);
+
+--returns festivals that has or is to occur in location where any of the staffs live
+SELECT f.festival_name Name, l.location_name.street Street, l.location_name.city City, l.location_name.country Country
+FROM festivals f
+JOIN locations l
+ON f.location_id=l.location_id
+WHERE l.location_name.street IN (
+	SELECT s.staff_address.street
+	FROM staff s
+);
+
+--MIN function with NESTED QUERY to get minimum salary of staff who is female
+SELECT s.staff_fname, s.staff_salary
+FROM staff s
+WHERE s.staff_salary=(
+	SELECT MIN(st.staff_salary)
+	FROM staff st
+	WHERE st.gender='F'
+);
+
+--returns festival that are occuring in given street
+SELECT f.festival_name, f.festival_date
+FROM festivals f
+WHERE f.location_id=(
+	SELECT l.location_id
+	FROM locations l
+	WHERE l.location_name.street='JORPATI 4'
+);
+
+--RECURSIVE / returns details of all those staff that have salary greater than their leader 
+SELECT s.staff_id, s.staff_fname, s.staff_lname, s.staff_salary, s.leader_id
+FROM staff s
+WHERE EXISTS(
+	SELECT m.staff_id
+	FROM staff m
+	WHERE s.leader_id IS NOT NULL
+	AND s.leader_id=m.staff_id
+	AND s.staff_salary>m.staff_salary
+);
+
+--RELATIONAL OPERATORS
+--UNION OPERATOR
+SELECT l.location_name.street Street, l.location_name.city City, l.location_name.country Country
+FROM locations l
+UNION
+SELECT s.staff_address.street, s.staff_address.city, s.staff_address.country
+FROM staff s;
+
+--UNION with WHERE clause
+SELECT l.location_name.street Street, l.location_name.city City, l.location_name.country Country
+FROM locations l
+WHERE l.location_name.country='USA';
+UNION
+SELECT s.staff_address.street, s.staff_address.city, s.staff_address.country
+FROM staff s
+WHERE s.staff_address.country='USA';
+
+--INTERSECT OPERATOR
+SELECT l.location_name.street Street, l.location_name.city City, l.location_name.country Country
+FROM locations l
+WHERE l.location_name.country='NEPAL';
+INTERSECT
+SELECT s.staff_address.street, s.staff_address.city, s.staff_address.country
+FROM staff s
+WHERE s.staff_address.country='NEPAL';
+
+--MINUS OPERATOR
+SELECT l.location_name.street Street, l.location_name.city City, l.location_name.country Country
+FROM locations l
+MINUS
+SELECT s.staff_address.street, s.staff_address.city, s.staff_address.country
+FROM staff s;
+
+--COMBINATION OF MULTIPLE RELATIONAL OPERATORS
+SELECT a.street Street, a.city City, a.country Country
+FROM addresses a
+MINUS
+(
+SELECT l.location_name.street, l.location_name.city, l.location_name.country
+FROM locations l
+UNION
+SELECT s.staff_address.street, s.staff_address.city, s.staff_address.country
+FROM staff s
+);
+
+--JOINS
+--INNER JOIN with where clause
+SELECT f.festival_name Name, f.festival_date "Date", l.location_name.street Street, l.location_name.city City, l.location_name.country Country
+FROM festivals f
+INNER JOIN locations l
+ON f.location_id=l.location_id
+WHERE f.ticket_price<1500
+OR 
+f.festival_name LIKE 'M%';
+
+--COMPOUND JOIN
+COLUMN Name FORMAT A18;
+COLUMN FDate FORMAT A10;
+COLUMN Activities FORMAT A15;
+COLUMN "RUN TIME" FORMAT A8;
+COLUMN FOODS FORMAT A30;
+--querying all data of festivals table
+SELECT fn.f_nature_name Nature, l.location_name.street Street, l.location_name.city City, l.location_name.country Country, f.festival_name Name, f.festival_date FDate, f.ticket_price Price, a.COLUMN_VALUE Activities , f.festival_details.running_time "RUN TIME", f.COLUMN_VALUE Foods
+FROM festivals f
+INNER JOIN festival_natures fn
+ON f.f_nature_id=fn.f_nature_id
+INNER JOIN locations l
+ON f.location_id=l.location_id, 
+TABLE(f.festival_details.activities) a, 
+TABLE(f.festival_details.food) f;
+
+--querying festival_staff table with COLUMN JOIN of various columns
+SELECT CONCAT(CONCAT(s.staff_fname, ' ') ,s.staff_lname) AS "Fullname", f.festival_name "Festival Name", fn.f_nature_name "Nature Name", CONCAT(CONCAT(l.location_name.street, ','), CONCAT(CONCAT(l.location_name.city,','),l.location_name.country)) AS "Location"
+FROM festival_staff fs
+INNER JOIN festivals f 
+ON fs.f_nature_id=f.f_nature_id
+AND fs.location_id=f.location_id
+INNER JOIN festival_natures fn
+ON fn.f_nature_id=fs.f_nature_id
+INNER JOIN locations l
+ON l.location_id=fs.location_id
+INNER JOIN staff s
+ON s.staff_id=fs.staff_id;
+
+--querying festival_staff table with all types of join of various columns
+SELECT CONCAT(CONCAT(s.staff_fname, ' ') ,s.staff_lname) AS "Fullname", f.festival_name "Festival Name", fn.f_nature_name "Nature Name", CONCAT(CONCAT(l.location_name.street, ','), CONCAT(CONCAT(l.location_name.city,','),l.location_name.country)) AS "Location"
+FROM festival_staff fs
+INNER JOIN festivals f 
+ON fs.f_nature_id=f.f_nature_id
+AND fs.location_id=f.location_id
+LEFT JOIN festival_natures fn
+ON fn.f_nature_id=fs.f_nature_id
+RIGHT JOIN locations l
+ON l.location_id=fs.location_id
+FULL OUTER JOIN staff s
+ON s.staff_id=fs.staff_id;
+
+--REMAINING OUTER, LEFT, RIGHT JOINS
+BREAK ON Nature ON Street ON City ON Country ON Name ON FDate ON Price ON "RUN TIME" ON Activities SKIP 1;
+--querying all columns from festivals table with LEFT join
+SELECT fn.f_nature_name Nature, l.location_name.street Street, l.location_name.city City, l.location_name.country Country, f.festival_name Name, f.festival_date FDate, f.ticket_price Price, a.COLUMN_VALUE Activities , f.festival_details.running_time "RUN TIME", f.COLUMN_VALUE Foods
+FROM festivals f
+LEFT JOIN festival_natures fn
+ON f.f_nature_id=fn.f_nature_id
+LEFT JOIN locations l
+ON f.location_id=l.location_id, 
+TABLE(f.festival_details.activities) a, 
+TABLE(f.festival_details.food) f;
+--44 rows selected
+
+--querying all columns from festivals table with RIGHT join
+SELECT fn.f_nature_name Nature, l.location_name.street Street, l.location_name.city City, l.location_name.country Country, f.festival_name Name, f.festival_date FDate, f.ticket_price Price, a.COLUMN_VALUE Activities , f.festival_details.running_time "RUN TIME", f.COLUMN_VALUE Foods
+FROM festivals f
+RIGHT JOIN festival_natures fn
+ON f.f_nature_id=fn.f_nature_id
+RIGHT JOIN locations l
+ON f.location_id=l.location_id, 
+TABLE(f.festival_details.activities) a, 
+TABLE(f.festival_details.food) f;
+--44 rows selected
+
+--querying all columns from festivals table with FULL OUTER join
+SELECT fn.f_nature_name Nature, l.location_name.street Street, l.location_name.city City, l.location_name.country Country, f.festival_name Name, f.festival_date FDate, f.ticket_price Price, a.COLUMN_VALUE Activities , f.festival_details.running_time "RUN TIME", f.COLUMN_VALUE Foods
+FROM festivals f
+FULL OUTER  JOIN festival_natures fn
+ON f.f_nature_id=fn.f_nature_id
+FULL OUTER JOIN locations l
+ON f.location_id=l.location_id, 
+TABLE(f.festival_details.activities) a, 
+TABLE(f.festival_details.food) f;
+--44 rows selected
+
+--EXTRA
+--using WITH clause
+--using WITH clause to show staff whose salary is greater than the average salary of all the staff
+--Citation: (Docs.oracle.com, 2019)
+WITH staff_average(average_salary) AS
+(SELECT AVG(staff_salary)
+FROM staff)
+SELECT staff_id,staff_fname||' '||staff_lname AS staff_name, staff_salary 
+FROM staff, staff_average 
+WHERE staff.staff_salary > staff_average.average_salary;
+--3 rows returned
+
+
+--using start with and connect by to show hierarchical view of staff
+--Citation: (Docs.oracle.com, 2019)
+--formatting columns
+COLUMN staff_name FORMAT A20;
+COLUMN leader_name FORMAT A20;
+
+SELECT staff_id, staff_fname||' '||staff_lname AS staff_name, gender, PRIOR staff_fname||' '||PRIOR staff_lname AS leader_name, LEVEL
+FROM staff
+START WITH staff_id=leader_id
+CONNECT BY NOCYCLE leader_id=PRIOR staff_id
+ORDER BY staff_id;
+--8 rows selected

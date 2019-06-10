@@ -1,0 +1,218 @@
+/*
+Group Number: 25
+File Name: triggers25.txt
+Group Members:  Shreejan Regmi - 18417132
+				Neetu Kumari Das- 18406487
+				Saurav Khatiwada - 18413649
+				Hira Bahadur Rana Kauchha - 18413703
+Module Name: Database 2
+Module Code: CSY2038			
+*/
+
+--@E:\CSY2038Ass2\triggers25.txt;
+
+--to display output on the screen
+SET SERVEROUTPUT ON
+
+--TRIGGER 1
+--Creating trigger trig_staff_dob_ck to check birth date of staff (not let below 18 years)
+CREATE OR REPLACE TRIGGER trig_staff_dob_ck
+BEFORE INSERT OR UPDATE
+ON staff
+FOR EACH ROW
+WHEN (NEW.staff_dob IS NOT NULL)
+	
+	DECLARE 
+		vd_today DATE;
+	
+	BEGIN
+		SELECT SYSDATE 
+		INTO vd_today
+		FROM DUAL;
+		
+		IF :NEW.staff_dob>(vd_today-(365*18)) THEN
+			RAISE_APPLICATION_ERROR(-20001, 'STAFF SHOULD BE AN ADULT'); 
+		END IF;
+END trig_staff_dob_ck;
+/
+SHOW ERRORS;
+--trigger created
+--show errors
+
+--TRIGGER 2
+--Creating a trigger to output message of insertion successful after insert on locations table
+CREATE OR REPLACE TRIGGER trig_locations_message
+AFTER INSERT OR UPDATE 
+ON locations
+	
+	BEGIN
+		IF INSERTING THEN
+			DBMS_OUTPUT.PUT_LINE('INSERTION SUCCESSFUL');
+		ELSIF UPDATING THEN
+			DBMS_OUTPUT.PUT_LINE('UPDATE SUCCESSFUL');
+		END IF;
+END trig_locations_message;
+/
+SHOW ERRORS;
+--trigger created
+--no errors
+
+--TRIGGER 3
+--creating a function func_calculate_staff_age to calculate the age of staff with DOB as parameter
+CREATE OR REPLACE FUNCTION func_calculate_staff_age(in_staff_dob DATE) RETURN NUMBER IS
+	vn_staff_age NUMBER(3);
+	
+	BEGIN
+		vn_staff_age:=(SYSDATE - in_staff_dob)/365;	
+		RETURN vn_staff_age;
+END func_calculate_staff_age;
+/
+SHOW ERRORS;
+--function created 
+--no errors
+
+--creating procedure proc_test_calc_age to test function func_calculate_staff_age 
+CREATE OR REPLACE PROCEDURE proc_test_calc_age(in_staff_dob DATE, in_staff_firstname VARCHAR2) IS
+		vn_staff_age NUMBER(3);
+		
+		BEGIN 
+			vn_staff_age:=func_calculate_staff_age(in_staff_dob);
+			DBMS_OUTPUT.PUT_LINE('You have added '||in_staff_firstname||' and their age is ' ||vn_staff_age);
+END proc_test_calc_age;
+/
+SHOW ERRORS;
+--procedure created
+--no errors
+
+--creating function func_calc_retiring to calculate days to retire
+CREATE OR REPLACE FUNCTION func_calc_retiring(in_staff_dob DATE) RETURN NUMBER IS
+	vn_retiring_days NUMBER(6);
+	BEGIN 
+		vn_retiring_days:=(65-func_calculate_staff_age(in_staff_dob))*365;
+		RETURN vn_retiring_days;
+END func_calc_retiring;
+/
+SHOW ERRORS;
+--function created
+--no errors
+
+--creating procedure proc_calc_retiring to test function func_calc_retiring
+CREATE OR REPLACE PROCEDURE proc_calc_retiring (in_staff_dob DATE) IS
+	vn_retiring_days NUMBER(6);
+	vn_retiring_years NUMBER(3);
+	BEGIN
+		vn_retiring_days:=func_calc_retiring(in_staff_dob);
+		vn_retiring_years:=vn_retiring_days/365;
+		DBMS_OUTPUT.PUT_LINE('Days before retirement: ' || vn_retiring_days);
+		DBMS_OUTPUT.PUT_LINE('Years before retirement: '||vn_retiring_years);
+END proc_calc_retiring;
+/
+SHOW ERRORS;
+--procedure created
+--no errors
+
+--creating a combined trigger with switch cases for table staff
+CREATE OR REPLACE TRIGGER trig_combined
+AFTER INSERT OR UPDATE OR DELETE
+ON staff
+REFERENCING OLD AS existing
+FOR EACH ROW
+	BEGIN
+		IF (INSERTING AND :NEW.staff_dob IS NOT NULL) THEN
+			proc_test_calc_age(:NEW.staff_dob, :NEW.staff_fname);
+		ELSIF (UPDATING AND :NEW.staff_dob IS NOT NULL) THEN
+			proc_calc_retiring(:NEW.staff_dob);
+		ELSIF DELETING THEN
+			DBMS_OUTPUT.PUT_LINE('You are deleting '||:existing.staff_fname||' '||:existing.staff_lname);
+		END IF;
+END trig_combined;
+/
+SHOW ERRORS;
+
+--Trigger created
+--No errors
+
+--TRIGGER 4
+--Creating schema level trigger to notify the action being performed
+--Citation: (Docs.oracle.com, 2019) 
+CREATE OR REPLACE TRIGGER trig_schema_level
+AFTER CREATE OR ALTER OR DROP
+ON SCHEMA
+	DECLARE 
+		vc_event VARCHAR2(50);
+		vc_current_schema VARCHAR2(20);
+		vc_event_obj VARCHAR2(50);
+		vc_obj_type VARCHAR2(25);
+	BEGIN
+		SELECT ora_sysevent 
+		INTO vc_event
+		FROM DUAL;
+		
+		SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA')
+		INTO vc_current_schema
+		FROM DUAL;
+		
+		SELECT ora_dict_obj_name
+		INTO vc_event_obj 
+		FROM DUAL;
+		
+		SELECT ora_dict_obj_type
+		INTO vc_obj_type 
+		FROM DUAL;
+		
+		DBMS_OUTPUT.PUT_LINE('Event- '||vc_event||' performed on schema '||vc_current_schema||' for '||vc_event_obj ||' '||vc_obj_type);
+END trig_schema_level;
+/
+SHOW ERRORS;
+--trigger created
+--no errors
+
+--TRIGGER 5
+--database level trigger to store login on a specific time 
+--creating table to store login and logoff information 
+CREATE TABLE history(
+	login_user VARCHAR2(20),
+	event VARCHAR2(50),
+	date_time TIMESTAMP
+);
+--table created
+
+--creating trigger trig_server_level to insert login and logout information
+CREATE OR REPLACE PROCEDURE proc_insert_history(in_user VARCHAR2,in_event VARCHAR2) IS
+	BEGIN
+	 INSERT INTO history VALUES (in_user ,in_event, CURRENT_TIMESTAMP);
+END proc_insert_history;
+/
+SHOW ERRORS;
+
+
+--creating logon trigger for database to store information about login
+--CITATION: (psoug.org, 2019)
+CREATE OR REPLACE TRIGGER trig_database_login
+AFTER LOGON
+ON DATABASE
+	BEGIN 
+		IF USER='CSY2038ASS2' THEN
+			proc_insert_history(USER ,'LOGON');
+		END IF;
+END trig_database_login;
+/
+SHOW ERRORS;
+--trigger created
+--no errors
+
+--TRIGGER 6
+----database level trigger to store logoff events on specific time  
+--creating logoff trigger for database to store information about logoff
+CREATE OR REPLACE TRIGGER trig_database_logoff
+BEFORE LOGOFF
+ON DATABASE
+	BEGIN 
+		IF USER='CSY2038ASS2' THEN
+			proc_insert_history(USER ,'LOGOFF');
+		END IF;
+END trig_database_logoff;
+/
+SHOW ERRORS;
+--trigger created
+--no errors
